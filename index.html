@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>うごくレンズ</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body data-phase="ready">
+  <div id="top-message"></div>
+
+  <main id="stage">
+    <canvas id="canvas"></canvas>
+    <div id="intro">なにが みえるかな？</div>
+    <div id="countdown">60</div>
+    <div id="error"></div>
+  </main>
+
+  <div id="answer"></div>
+
+  <footer id="controls">
+    <button type="button" class="action" id="btn-start" disabled>スタート</button>
+    <button type="button" class="action" id="btn-stop">ストップ</button>
+    <button type="button" class="action" id="btn-reveal">こたえをみる</button>
+    <button type="button" class="action" id="btn-retry">次は何でしょう？</button>
+  </footer>
+
+  <script src="script.js"></script>
+</body>
+</html>
