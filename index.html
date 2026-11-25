@@ -46,6 +46,10 @@
 <style>
 #btnFullscreen{position:fixed;top:1.2vh;left:1.2vw;top:auto;bottom:1.2vh;z-index:9999;font-family:inherit;font-size:max(13px,2.4vh);line-height:1.2;padding:.7vh 1.3vw;border-radius:1.2vh;border:.3vh solid rgba(60,40,20,.35);background:rgba(255,255,255,.82);color:#4a3a2a;opacity:.8;cursor:pointer;box-shadow:none}
 #btnFullscreen:hover,#btnFullscreen:focus-visible{opacity:1}
+
+body.has-started #btn-intro {
+  display: none !important;
+}
 </style>
 <button id="btnFullscreen" type="button" aria-label="全画面表示">⛶ 全画面</button>
 <script>
@@ -67,6 +71,11 @@
   document.addEventListener('webkitfullscreenchange',upd);
   upd();
 })();
+</script>
+<script>
+document.getElementById('btn-start').addEventListener('click', function() {
+  document.body.classList.add('has-started');
+});
 </script>
 </body>
 </html>
