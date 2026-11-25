@@ -19,6 +19,7 @@
   <div id="answer"></div>
 
   <footer id="controls">
+    <button type="button" class="action" id="btn-intro">説明をきく</button>
     <button type="button" class="action" id="btn-start" disabled>スタート</button>
     <button type="button" class="action" id="btn-stop">ストップ</button>
     <button type="button" class="action" id="btn-reveal">こたえをみる</button>
@@ -26,6 +27,20 @@
   </footer>
 
   <script src="script.js"></script>
+<script>
+(function() {
+  const introAudio = new Audio('audio/intro.wav');
+  const introButton = document.getElementById('btn-intro');
+
+  introButton.addEventListener('click', function() {
+    if (!introAudio.paused) return;
+    introAudio.currentTime = 0;
+    introAudio.play().catch(function(error) {
+      console.error('音声を再生できませんでした:', error);
+    });
+  });
+})();
+</script>
 
 <!-- 全画面ボタン（スタッフ用・共通部品 v1） -->
 <style>
