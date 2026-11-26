@@ -11,6 +11,7 @@
 
   <main id="stage">
     <canvas id="canvas"></canvas>
+    <div id="chara"><img class="charaimg" src="chara_close.jpg" alt="司会者"></div>
     <div id="intro">なにが みえるかな？</div>
     <div id="countdown">60</div>
     <div id="error"></div>
@@ -28,15 +29,62 @@
 
   <script src="script.js"></script>
 <script>
+// 「説明をきく」：説明の声に合わせて、キャラクターの口が動く
 (function() {
   const introAudio = new Audio('audio/intro.wav');
   const introButton = document.getElementById('btn-intro');
+  const CH = { close: 'chara_close.jpg', half: 'chara_half.jpg', open: 'chara_open.jpg', blink: 'chara_blink.jpg' };
+  Object.values(CH).forEach(function(s) { var im = new Image(); im.src = s; });
+  const LIP_OPEN = 140, LIP_HALF = 60;   // しきい値（声の大きさ。あとで調整できる）
+  let ctx = null, an = null, sourced = false, timer = null, blinkT = null, blinking = false;
+  function setChara(k) { document.querySelectorAll('.charaimg').forEach(function(im) { im.src = CH[k]; }); }
+  function playing() { return !introAudio.paused && !introAudio.ended; }
+  function lipStart() {
+    lipStop();
+    // 声の解析は、インターネット上（https）だけで使える。パソコン内のファイルを直接開いたときは、簡易の口パク。
+    if (!ctx && /^https?:$/.test(location.protocol)) {
+      try {
+        ctx = new (window.AudioContext || window.webkitAudioContext)();
+        an = ctx.createAnalyser(); an.fftSize = 256; an.smoothingTimeConstant = 0.3;
+        an.connect(ctx.destination);
+      } catch (e) { ctx = null; an = null; }
+    }
+    let useAn = false;
+    if (an) {
+      try {
+        if (!sourced) { ctx.createMediaElementSource(introAudio).connect(an); sourced = true; }
+        useAn = true;
+        if (ctx.state === 'suspended') ctx.resume();
+      } catch (e) { useAn = false; }
+    }
+    const data = useAn ? new Uint8Array(an.frequencyBinCount) : null;
+    timer = setInterval(function() {
+      if (blinking) return;
+      if (!playing()) { setChara('close'); return; }
+      if (!useAn) { var r = Math.random(); setChara(r > .66 ? 'open' : (r > .33 ? 'half' : 'close')); return; }
+      an.getByteFrequencyData(data);
+      var sum = 0; for (var i = 0; i < 30; i++) sum += data[i];
+      var avg = sum / 30; window.__lipAvg = avg;
+      setChara(avg > LIP_OPEN ? 'open' : (avg > LIP_HALF ? 'half' : 'close'));
+    }, 90);
+    (function sched() {
+      blinkT = setTimeout(function() {
+        if (playing()) { blinking = true; setChara('blink'); setTimeout(function() { blinking = false; setChara('close'); }, 150); }
+        sched();
+      }, 3000 + Math.random() * 2000);
+    })();
+  }
+  function lipStop() { clearInterval(timer); clearTimeout(blinkT); timer = null; blinkT = null; blinking = false; setChara('close'); }
 
+  introAudio.addEventListener('ended', lipStop);
+  introAudio.addEventListener('error', lipStop);
   introButton.addEventListener('click', function() {
     if (!introAudio.paused) return;
     introAudio.currentTime = 0;
+    lipStart();
     introAudio.play().catch(function(error) {
       console.error('音声を再生できませんでした:', error);
+      lipStop();
     });
   });
 })();
